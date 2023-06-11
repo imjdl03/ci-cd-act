@@ -1,87 +1,118 @@
-name: Deploy 🚀
-on: push:
-       branches:
-         - main
-         - dev
-     pull_request:
-   concurrency:
- 
-   group: ${{ github.workflow }}-${{ github.ref }}
+name: 🚀 Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 permissions:
   actions: write
   contents: read
-jobs: lint:
-name: ⬣ ESLint runs-on: ubuntu-latest steps:
-- name: Checkout repo ⬇
-uses: actions/checkout@v3
-- name: ⎔ Setup node
-uses: actions/setup-node@v3 with:
+
+jobs:
+  lint:
+    name: ⬣ ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
           cache: npm
           cache-dependency-path: ./package.json
           node-version: 18
-- name: Install deps 📥
-run: npm install
-- name: Lint
-🔬
-run: npm run lint
-typecheck:
-name: ʦ TypeScript runs-on: ubuntu-latest steps:
-- name: Checkout repo ⬇
-uses: actions/checkout@v3
-- name: ⎔ Setup node
-uses: actions/setup-node@v3 with:
+
+      - name: 📥 Install deps
+        run: npm install --legacy-peer-deps
+
+      - name: 🔬 Lint
+        run: npm run lint
+
+  typecheck:
+    name: ʦ TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
           cache: npm
           cache-dependency-path: ./package.json
           node-version: 18
-- name: Install deps 📥
-run: npm install
 
- - name: Type check
-🔎
-run: npm run typecheck --if-present
-vitest:
-name: Vitest
-⚡
-runs-on: ubuntu-latest steps:
-- name: Checkout repo ⬇
-uses: actions/checkout@v3
-- name: ⎔ Setup node
-uses: actions/setup-node@v3 with:
-        cache: npm
-        cache-dependency-path: ./package.json
-        node-version: 18
-- name: Install deps 📥
-run: npm install
-- name: Run vitest
-⚡
-run: npm run test -- --coverage
-cypress:
-name: Cypress
-⚫
-runs-on: ubuntu-latest steps:
-- name: Checkout repo ⬇
-uses: actions/checkout@v3
-- name: Copy test env vars 🏄
-run: cp .env.example .env
-- name: ⎔ Setup node
-uses: actions/setup-node@v3 with:
-        cache: npm
-        cache-dependency-path: ./package.json
-        node-version: 18
-- name: Install deps 📥
-run: npm install
+      - name: 📥 Install deps
+        run: npm install --legacy-peer-deps
 
- - name: Setup Database
-🛠
-run: npx prisma migrate reset --force
-- name: Build
-⚙
-run: npm run build
-- name: Cypress run
-🌳
-uses: cypress-io/github-action@v5 with:
-    start: npm run start:mocks
-    wait-on: http://localhost:8811
-  env:
-PORT: 8811
+      - name: 🔎 Type check
+        run: npm run typecheck --if-present --legacy-peer-deps
+
+  vitest:
+    name: ⚡ Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          cache: npm
+          cache-dependency-path: ./package.json
+          node-version: 18
+
+      - name: 📥 Install deps
+        run: npm install --legacy-peer-deps
+
+      - name: ⚡ Run vitest
+        run: npm run test -- --coverage
+
+  cypress:
+    name: ⚫ Cypress
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🏄 Copy test env vars
+        run: cp .env.example .env
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          cache: npm
+          cache-dependency-path: ./package.json
+          node-version: 18
+
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: "12"
+          postgresql db: remixdb_c2qf
+          postgresql user: remixdb_c2qf_user
+          postgresql password: WEoXCkvci7lQmWsB9Kxbntpb2jbbJq0i
+
+      - name: 📥 Install deps
+        run: npm install --legacy-peer-deps --force
+
+      - name: 🛠 Setup Database
+        run: npx prisma migrate reset --force
+
+      - name: ⚙ Build
+        run: npm run build
+
+      - name: 🌳 Cypress run
+        uses: cypress-io/github-action@v5
+        with:
+          start: npm run start:mocks
+          wait-on: http://localhost:8811
+        env:
+          PORT: 8811
