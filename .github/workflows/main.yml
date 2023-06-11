@@ -96,9 +96,9 @@ jobs:
       - uses: harmon758/postgresql-action@v1
         with:
           postgresql version: "15"
-          postgresql db: remixdb_c2qf
-          postgresql user: remixdb_c2qf_user
-          postgresql password: WEoXCkvci7lQmWsB9Kxbntpb2jbbJq0i
+          postgresql db: cicdact
+          postgresql user: cicdactdb
+          postgresql password: ztvCdxQBIo6b9usnV1Cnme0ZoNO3Tn3F
 
       - name: 📥 Install deps
         run: npm install --legacy-peer-deps --force
